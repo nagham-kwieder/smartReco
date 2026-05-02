@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartReco - التوصيات</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -98,7 +99,7 @@
     <a href="/index.html">الرئيسية</a>
     <a href="/recommend.html">التوصيات</a>
     <a href="/dashboard.html">الإحصائيات</a>
-    <a href="/how_it_works">كيف يعمل النظام؟</a>
+    <a href="/how_it_works.html">كيف يعمل النظام؟</a>
     <a href="/about.html">من نحن</a>
     <a href="/contact.html">تواصل معنا</a>
     <a href="/cart.html" class="cart-btn">السلة <span id="cartCount"></span></a>
@@ -235,7 +236,8 @@ function getRecommendations() {
     fetch("/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id })
+        body: JSON.stringify({ user_id: parseInt(user_id) })
+
     })
     .then(res => res.json())
     .then(data => {
@@ -270,6 +272,7 @@ function getRecommendations() {
         currentIndex = 0;
         renderMore();
         document.getElementById("loadMoreBtn").style.display = "block";
+        
     })
     .catch(() => {
         container.innerHTML = "<p>حدث خطأ أثناء جلب التوصيات</p>";
