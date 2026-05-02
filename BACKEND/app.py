@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from ga_engine import ExcelDatabase, Chromosome, DataPreprocessor, GeneticRecommender
-
+current_dir = os.path.dirname(os.path.abspath(__file__))
 # Initialize Flask - template folder is in BACKEND
 app = Flask(__name__, 
             template_folder=os.path.join(current_dir, 'templates'),
@@ -24,11 +24,8 @@ def initialize_system():
     if preprocessor is not None and ga is not None:
         return  # Already initialized
     
-    print("="*60)
     print("INITIALIZING SYSTEM...")
-    print("="*60)
-    
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+            
     print(f"Working directory: {current_dir}")
     print(f"Files found: {os.listdir(current_dir)}")
     
