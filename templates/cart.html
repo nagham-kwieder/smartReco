@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartReco - السلة</title>
+    <link rel="stylesheet" href="CSS/style.css">
+
+    <style>
+        .cart-container {
+            width: 80%;
+            margin: 40px auto;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .cart-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .cart-item img {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .cart-info {
+            flex: 1;
+        }
+
+        .remove-btn {
+            padding: 10px 20px;
+            background: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #b52b27;
+        }
+
+        .clear-btn {
+            padding: 12px 25px;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .clear-btn:hover {
+            background: #222;
+        }
+
+        .total-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="logo">SmartReco</div>
+
+    <a href="/index.html">الرئيسية</a>
+    <a href="/recommend.html">التوصيات</a>
+    <a href="/dashboard.html">الإحصائيات</a>
+    <a href="/how_it_works">كيف يعمل النظام؟</a>
+    <a href="/about.html">من نحن</a>
+    <a href="/contact.html">تواصل معنا</a>
+    <a href="/cart.html" class="cart-btn">السلة <span id="cartCount"></span></a>
+</nav>
+
+<div class="hero">
+    <h1>سلة المشتريات</h1>
+    <p>هنا تظهر المنتجات التي قمت بإضافتها</p>
+</div>
+
+<div class="cart-container">
+    <div id="cartItems"></div>
+
+    <div class="total-box" id="totalPrice">الإجمالي: 0 ل.س</div>
+
+    <button class="clear-btn" onclick="clearCart()">إفراغ السلة</button>
+</div>
+
+<footer>
+    © 2026 SmartReco — جميع الحقوق محفوظة
+</footer>
+
+<script>
+/* تحميل السلة */
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function updateCartCount() {
+    document.getElementById("cartCount").innerText = `(${cart.length})`;
+}
+
+/* عرض السلة */
+function renderCart() {
+    const container = document.getElementById("cartItems");
+    container.innerHTML = "";
+
+    if (cart.length === 0) {
+        container.innerHTML = "<p>السلة فارغة حالياً</p>";
+        document.getElementById("totalPrice").innerText = "الإجمالي: 0 ل.س";
+        return;
+    }
+
+    let total = 0;
+
+    cart.forEach((item, index) => {
+        total += item.price;
+
+        container.innerHTML += `
+            <div class="cart-item">
+                <img src="https://images.pexels.com/photos/271743/pexels-photo-271743.jpeg" alt="product">
+
+                <div class="cart-info">
+                    <h3>${item.category}</h3>
+                    <p>السعر: ${item.price} ل.س</p>
+                    <p>السكور: ${item.score.toFixed(2)}</p>
+                </div>
+
+                <button class="remove-btn" onclick="removeItem(${index})">حذف</button>
+            </div>
+        `;
+    });
+
+    document.getElementById("totalPrice").innerText = `الإجمالي: ${total} ل.س`;
+}
+
+/* حذف عنصر */
+function removeItem(index) {
+    cart.splice(index, 1);
+    saveCart();
+    updateCartCount();
+    renderCart();
+}
+
+/* إفراغ السلة */
+function clearCart() {
+    cart = [];
+    saveCart();
+    updateCartCount();
+    renderCart();
+}
+
+/* تشغيل */
+updateCartCount();
+renderCart();
+</script>
+
+</body>
+</html>

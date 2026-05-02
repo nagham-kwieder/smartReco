@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartReco - التوصيات</title>
+    <link rel="stylesheet" href="CSS/style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        .recommend-container {
+            width: 80%;
+            margin: 40px auto;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .input-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .input-box input {
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            width: 200px;
+            margin-left: 10px;
+        }
+
+        .cards-container {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .card img {
+            width: 100%;
+            height: 160px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .add-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .add-btn:hover {
+            background: #1558b0;
+        }
+
+        #loadMoreBtn {
+            display: none;
+            margin: 30px auto;
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            background: #fff;
+            font-size: 18px;
+            display: block;
+        }
+        .loading { text-align: center; font-size: 18px; margin-top: 20px; }
+     
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="logo">SmartReco</div>
+
+    <a href="/index.html">الرئيسية</a>
+    <a href="/recommend.html">التوصيات</a>
+    <a href="/dashboard.html">الإحصائيات</a>
+    <a href="/how_it_works">كيف يعمل النظام؟</a>
+    <a href="/about.html">من نحن</a>
+    <a href="/contact.html">تواصل معنا</a>
+    <a href="/cart.html" class="cart-btn">السلة <span id="cartCount"></span></a>
+</nav>
+
+<div class="hero">
+    <h2>توصيات ذكية مخصصة لكل مستخدم</h2>
+    <h1>احصل على توصياتك الذكية</h1>
+     <p style="margin-top:10px; font-size:16px;">
+    التوصيات يتم توليدها باستخدام خوارزمية جينية تعتمد على سلوك المستخدم (view مشاهدة, click ضغط, purchase شراء)
+</p>
+
+    <p>أدخل رقم المستخدم للحصول على أفضل المنتجات المناسبة لك</p>
+   
+</div>
+
+<div class="recommend-container">
+    <div class="input-box">
+        <label>رقم المستخدم:</label>
+        <input id="user_id" type="number">
+        <button class="btn" onclick="getRecommendations()">عرض التوصيات</button>
+    </div>
+
+    <div id="results" class="cards-container"></div>
+    <div id="userInfo" style="text-align:center; margin-top:20px;"></div>
+
+    <button id="loadMoreBtn" onclick="renderMore()">عرض المزيد</button>
+</div>
+
+<footer>
+    © 2026 SmartReco — جميع الحقوق محفوظة
+</footer>
+
+<script>
+/* إخفاء زر عرض المزيد عند فتح الصفحة */
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("loadMoreBtn").style.display = "none";
+});
+
+/* صور الفئات */
+const categoryImages = {
+    "electronics": "https://images.pexels.com/photos/1054397/pexels-photo-1054397.jpeg",
+    "perfumes": "https://images.pexels.com/photos/965989/pexels-photo-965989.jpeg",
+    "perfume": "https://images.pexels.com/photos/965989/pexels-photo-965989.jpeg",
+    "fragrance": "https://images.pexels.com/photos/965989/pexels-photo-965989.jpeg",
+    "toys": "https://images.pexels.com/photos/3662667/pexels-photo-3662667.jpeg",
+    "toy": "https://images.pexels.com/photos/3662667/pexels-photo-3662667.jpeg",
+    "kids": "https://images.pexels.com/photos/3662667/pexels-photo-3662667.jpeg",
+    "clothes": "https://images.pexels.com/photos/2983464/pexels-photo-2983464.jpeg",
+    "sports": "https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg",
+    "books": "https://images.pexels.com/photos/415071/pexels-photo-415071.jpeg",
+    "home": "https://images.pexels.com/photos/271743/pexels-photo-271743.jpeg"
+};
+
+/* نظام السلة */
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function updateCartCount() {
+    document.getElementById("cartCount").innerText = `(${cart.length})`;
+}
+
+updateCartCount();
+
+/* إضافة منتج للسلة */
+function addProduct(product) {
+    cart.push(product);
+    saveCart();
+    updateCartCount();
+    alert("تمت إضافة المنتج إلى السلة");
+}
+
+/* نظام عرض المزيد */
+let allRecs = [];
+let currentIndex = 0;
+const perPage = 9;
+
+function renderMore() {
+    const container = document.getElementById("results");
+
+    const nextItems = allRecs.slice(currentIndex, currentIndex + perPage);
+
+    nextItems.forEach(r => {
+        const key = r.category.toLowerCase().trim();
+        const img = categoryImages[key] || categoryImages["home"];
+
+        container.innerHTML += `
+            <div class="card">
+                <img src="${img}" alt="product">
+                <h3>منتج رقم ${r.product_id}</h3>
+                <p>الفئة: ${r.category}</p>
+                <p class="price">السعر: ${r.price} ل.س</p>
+                <p class="score">السكور: ${r.score.toFixed(2)}</p>
+                <p style="color:lightgreen;">موصى به لك</p>
+                <p style="font-size:14px; color:lightblue;">
+                 تم اقتراح هذا المنتج بناءً على سلوكك (مشاهدة / نقر / شراء)
+                </p>
+
+
+                <button class="add-btn" onclick='addProduct(${JSON.stringify(r)})'>
+                    إضافة
+                </button>
+            </div>
+        `;
+    });
+
+    currentIndex += perPage;
+
+    if (currentIndex >= allRecs.length) {
+        document.getElementById("loadMoreBtn").style.display = "none";
+    }
+}
+
+/* جلب التوصيات */
+function getRecommendations() {
+    const user_id = document.getElementById("user_id").value;
+    const container = document.getElementById("results");
+    // عرض معلومات المستخدم
+     document.getElementById("userInfo").innerHTML = 
+    `<h2>توصيات مخصصة للمستخدم رقم ${user_id}</h2>`;
+
+    //  تحقق من الإدخال
+    if (!user_id) {
+        alert("الرجاء إدخال رقم المستخدم");
+        return;
+    }
+
+    //  loading
+    container.innerHTML = "<p class='loading'>جاري تحميل التوصيات...</p>";
+
+    fetch("/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        container.innerHTML = "";
+
+        //  في حال كان لا يوجد نتائج 
+        if (!data.recommendations || data.recommendations.length === 0) {
+            container.innerHTML = "<p>لا يوجد توصيات لهذا المستخدم</p>";
+            document.getElementById("loadMoreBtn").style.display = "none";
+            return;
+        }
+
+        //  ترتيب حسب السكور
+        allRecs = data.recommendations.sort((a, b) => b.score - a.score);
+
+        //  استخراج الفئة الأكثر تكرار
+          const categories = allRecs.map(r => r.category);
+
+           const mostCommon = categories.sort((a,b) =>
+                  categories.filter(v => v===a).length - categories.filter(v => v===b).length
+            ).pop();
+
+             document.getElementById("userInfo").innerHTML += 
+                    `<p>الفئة المفضلة لديك: ${mostCommon}</p>`;
+
+
+        const bestScore = allRecs[0].score;
+
+        document.getElementById("userInfo").innerHTML += 
+        `<p>أفضل توصية (Fitness): ${bestScore.toFixed(2)}</p>`;
+
+        currentIndex = 0;
+        renderMore();
+        document.getElementById("loadMoreBtn").style.display = "block";
+    })
+    .catch(() => {
+        container.innerHTML = "<p>حدث خطأ أثناء جلب التوصيات</p>";
+    });
+}
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
