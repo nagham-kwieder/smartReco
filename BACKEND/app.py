@@ -9,7 +9,9 @@ from ga_engine import ExcelDatabase, Chromosome, DataPreprocessor, GeneticRecomm
 
 # Initialize Flask - template folder is in BACKEND
 app = Flask(__name__, 
-            template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
+            template_folder=os.path.join(current_dir, 'templates'),
+            static_folder=os.path.join(current_dir, 'static'),
+            static_url_path='/static')
 
 # Global variables (initialized later)
 preprocessor = None
