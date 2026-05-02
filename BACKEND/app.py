@@ -45,13 +45,13 @@ def initialize_system():
     # Initialize GA with smaller values for Render free tier
     ga = GeneticRecommender(
         preprocessor=preprocessor,
-        population_size=10,   # Reduced for Render
-        elite_count=2,
-        tournament_size=3
+        population_size=5,   # Reduced for Render
+        elite_count=1,
+        tournament_size=2
     )
-    
+
     # Train with fewer generations
-    best = ga.run(generations=3)
+    best = ga.run(generations=2)
     print(f"✓ System initialized. Best fitness: {best.fitness:.4f}")
     return best
 
